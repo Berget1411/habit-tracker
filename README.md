@@ -87,4 +87,18 @@ Follow the on-screen instructions to open the app in:
 
 ## Development
 
+## Test Workflow
+
+### Test backend workflow
+
+act -j build -W .github/workflows/backend.yml
+
+### Test frontend workflow
+
+act -j build -W .github/workflows/frontend.yml
+
+### Test mobile workflow
+
+act -j build -W .github/workflows/mobile.yml
+
 ### Project Structure
