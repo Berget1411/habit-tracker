@@ -9,6 +9,6 @@ export const createApp = async () => {
   app.get("/", (req, res) => {
     res.send("Hello World");
   });
-  console.log("App created");
+
   return app;
 };
