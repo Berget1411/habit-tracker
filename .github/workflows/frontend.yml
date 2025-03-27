@@ -60,4 +60,4 @@ jobs:
         with:
           context: ./frontend
           push: true
-          tags: yourusername/frontend:latest
+          tags: ludvig1411/frontend:latest
