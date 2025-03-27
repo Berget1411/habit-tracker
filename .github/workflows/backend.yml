@@ -63,6 +63,11 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
+      # Enable Cloud Run API
+      - name: Enable Cloud Run API
+        run: |
+          gcloud services enable run.googleapis.com --project=${{ env.PROJECT_ID }}
+
       # Set up Docker for Artifact Registry
       - name: "Set up Docker for GCP Artifact Registry"
         run: |
