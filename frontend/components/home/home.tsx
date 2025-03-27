@@ -6,10 +6,10 @@ export function Home() {
   useEffect(() => {
     const fetchMessage = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         console.log("Fetching from:", apiUrl);
-
-        const res = await fetch(apiUrl);
+        console.log("Fetching from:", process.env.NEXT_PUBLIC_API_URL);
+        const res = await fetch(apiUrl || "");
         console.log("Response status:", res.status);
 
         // Log the actual response text for debugging

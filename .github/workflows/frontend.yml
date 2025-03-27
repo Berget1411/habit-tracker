@@ -88,4 +88,5 @@ jobs:
             --platform managed \
             --region us-central1 \
             --allow-unauthenticated \
+            --set-env-vars "NEXT_PUBLIC_API_URL=${{ secrets.BACKEND_URL }}" \
             --project ${{ env.PROJECT_ID }}
