@@ -7,9 +7,11 @@ export function Home() {
     const fetchMessage = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const apiUrl2 = process.env.BACKEND_URL;
         console.log("Fetching from:", apiUrl);
-        console.log("Fetching from:", process.env.NEXT_PUBLIC_API_URL);
+        console.log("Fetching from:", apiUrl2);
         const res = await fetch(apiUrl || "");
+        console.log("Response:", res);
         console.log("Response status:", res.status);
 
         // Log the actual response text for debugging

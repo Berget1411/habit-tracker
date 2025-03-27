@@ -68,19 +68,30 @@ jobs:
         run: |
           gcloud auth configure-docker us-central1-docker.pkg.dev
 
+      # Fetch environment variables from Secret Manager and create .env file
+      - name: "Fetch environment variables from Secret Manager"
+        run: |
+          # Create .env.production file for frontend
+          echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" > ./frontend/.env.production
+          # You can add more environment variables here as needed
+          cat ./frontend/.env.production
+
       # Debug to check if project ID is correctly set
       - name: "Debug project ID"
         run: |
           echo "Project ID: ${{ env.PROJECT_ID }}"
 
-      # Build and push the Docker image with explicit project ID
+      # Build and push the Docker image with explicit project ID and environment file
       - name: "Build and push Docker image"
         run: |
           # Use hardcoded project ID in the image tag
-          docker build -t us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/frontend-repo/frontend:${{ github.sha }} ./frontend
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
+            -t us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/frontend-repo/frontend:${{ github.sha }} \
+            ./frontend
           docker push us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/frontend-repo/frontend:${{ github.sha }}
 
-      # Deploy to Cloud Run with explicit project ID
+      # Deploy to Cloud Run with explicit project ID and environment variable
       - name: "Deploy to Cloud Run"
         run: |
           gcloud run deploy frontend \
@@ -88,5 +99,5 @@ jobs:
             --platform managed \
             --region us-central1 \
             --allow-unauthenticated \
-            --set-env-vars "NEXT_PUBLIC_API_URL=${{ secrets.BACKEND_URL }}" \
+            --set-env-vars "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" \
             --project ${{ env.PROJECT_ID }}
