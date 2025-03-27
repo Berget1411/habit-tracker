@@ -1,20 +1,24 @@
-FROM node:18-alpine
+FROM node:lts-alpine AS base
 
+# Stage 1: Install dependencies
+FROM base AS deps
 WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm install --production
 
-COPY package*.json ./
-
-RUN npm install
-
+# Stage 2: Build the application
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npm run build
 
-# For development, we don't need to build
-# RUN npm run build
+# Stage 3: Production server
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
-
-# Use development mode for local testing
-ENV NODE_ENV=development
-
-# Use development server instead of production server
-CMD ["npm", "run", "dev"]
+CMD ["node", "server.js"]
