@@ -43,36 +43,49 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
+    # Hardcode the project ID as an environment variable
+    env:
+      PROJECT_ID: spry-sentry-455010-v1 # Use your actual project ID here
+
     steps:
       - uses: actions/checkout@v4
 
-      # Set up Google Cloud SDK
+      # Set up Google Cloud SDK with explicit project ID
       - id: "auth"
         name: "Authenticate to Google Cloud"
         uses: "google-github-actions/auth@v1"
         with:
           credentials_json: "${{ secrets.GCP_SA_KEY }}"
+          project_id: ${{ env.PROJECT_ID }}
 
       - name: "Set up Cloud SDK"
         uses: "google-github-actions/setup-gcloud@v1"
+        with:
+          project_id: ${{ env.PROJECT_ID }}
 
-      # Configure Docker to use gcloud as a credential helper
-      - name: "Set up Docker for GCP"
+      # Set up Docker for Artifact Registry
+      - name: "Set up Docker for GCP Artifact Registry"
         run: |
-          gcloud auth configure-docker gcr.io
+          gcloud auth configure-docker us-central1-docker.pkg.dev
 
-      # Build and push the Docker image
+      # Debug to check if project ID is correctly set
+      - name: "Debug project ID"
+        run: |
+          echo "Project ID: ${{ env.PROJECT_ID }}"
+
+      # Build and push the Docker image with explicit project ID
       - name: "Build and push Docker image"
         run: |
-          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/frontend:${{ github.sha }} ./frontend
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/frontend:${{ github.sha }}
+          # Use hardcoded project ID in the image tag
+          docker build -t us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/frontend-repo/frontend:${{ github.sha }} ./frontend
+          docker push us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/frontend-repo/frontend:${{ github.sha }}
 
-      # Deploy to Cloud Run
+      # Deploy to Cloud Run with explicit project ID
       - name: "Deploy to Cloud Run"
         run: |
           gcloud run deploy frontend \
-            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/frontend:${{ github.sha }} \
+            --image us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/frontend-repo/frontend:${{ github.sha }} \
             --platform managed \
             --region us-central1 \
             --allow-unauthenticated \
-            --project ${{ secrets.GCP_PROJECT_ID }}
+            --project ${{ env.PROJECT_ID }}
