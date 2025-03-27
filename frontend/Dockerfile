@@ -1,24 +1,24 @@
-FROM node:lts-alpine AS base
-
-# Stage 1: Install dependencies
-FROM base AS deps
+# Build stage
+FROM node:18-alpine AS builder
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm install --production
-
-# Stage 2: Build the application
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY package*.json ./
+RUN npm install
 COPY . .
 RUN npm run build
 
-# Stage 3: Production server
-FROM base AS runner
+# Production stage
+FROM node:18-alpine AS runner
 WORKDIR /app
+
 ENV NODE_ENV=production
+
+# Copy necessary files
+COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
+
+# Set the command to run the standalone server
 CMD ["node", "server.js"]
