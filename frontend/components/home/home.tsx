@@ -5,10 +5,33 @@ export function Home() {
   const [message, setMessage] = useState("");
   useEffect(() => {
     const fetchMessage = async () => {
-      const res = await fetch(process.env.NEXT_PUBLIC_API_URL || "");
-      const data = await res.json();
-      console.log(data);
-      setMessage(data.message);
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+        console.log("Fetching from:", apiUrl);
+
+        const res = await fetch(apiUrl);
+        console.log("Response status:", res.status);
+
+        // Log the actual response text for debugging
+        const text = await res.text();
+        console.log("Response text:", text);
+
+        // Try to parse as JSON
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error("Failed to parse response as JSON:", e);
+          setMessage("Error: Backend returned invalid data");
+          return;
+        }
+
+        console.log("Parsed data:", data);
+        setMessage(data.message || "No message received");
+      } catch (error) {
+        console.error("Fetch error:", error);
+        setMessage("Error connecting to backend");
+      }
     };
     fetchMessage();
   }, []);
